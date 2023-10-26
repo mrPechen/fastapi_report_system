@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+
+  keycloak-db:
+    image: postgres:latest
+    container_name: keycloak-db
+    restart: on-failure
+    environment:
+      POSTGRES_USER: '${KC_DB_USERNAME}'
+      POSTGRES_PASSWORD: '${KC_DB_PASSWORD}'
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - '5433:5432'
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  keycloak_service:
+    image: quay.io/keycloak/keycloak:20.0.2
+    container_name: keycloak_service
+    command:
+      - start --auto-build --db postgres --hostname-strict-https false --hostname-strict false --proxy edge --http-enabled true --import-realm --spi-user-profile-legacy-user-profile-read-only-attributes *_RES_ACCESS_MODE
+    env_file:
+      - ./.env
+    ports:
+      - '8282:8080'
+    depends_on:
+      keycloak-db:
+        condition: service_healthy

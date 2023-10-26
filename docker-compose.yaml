@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    container_name: fastapi_postgres
+    image: postgres:latest
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - report_system
+
+  fastapi:
+    container_name: fastapi
+    build:
+      context: .
+    command: uvicorn application.main:app --host 0.0.0.0 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    networks:
+      - report_system
+    restart: always
+    depends_on:
+      - db
+
+
+networks:
+    report_system:
+      driver: bridge

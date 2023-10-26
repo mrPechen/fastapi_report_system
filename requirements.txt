@@ -1,0 +1,8 @@
+fastapi[all]
+environs
+sqlalchemy
+pandas
+pydantic
+fastapi_keycloak
+requests
+environs
